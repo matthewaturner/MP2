@@ -28,7 +28,7 @@ typedef struct header {
 	unsigned int size;
 } *head;
 
-char *free_list; // = calloc((int)log2(memsize), sizeof(*char));
+//char *free_list; // = calloc((int)log2(memsize), sizeof(*char));
 
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */ 
