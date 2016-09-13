@@ -14,3 +14,5 @@ memtest.o : memtest.c
 memtest: memtest.o ackerman.o my_allocator.o
 	g++ -o memtest memtest.o ackerman.o my_allocator.o
 
+clean:
+	rm *.o

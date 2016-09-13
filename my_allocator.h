@@ -46,8 +46,8 @@ typedef void * Addr;
 /* MODULE   MY_ALLOCATOR */
 /*--------------------------------------------------------------------------*/
 
-unsigned int init_allocator(unsigned int _basic_block_size, 
-			    unsigned int _length); 
+unsigned int init_allocator(unsigned int bbs, 
+			    unsigned int M); 
 /* This function initializes the memory allocator and makes a portion of 
    ’_length’ bytes available. The allocator uses a ’_basic_block_size’ as 
    its minimal unit of allocation. The function returns the amount of 
@@ -57,7 +57,9 @@ unsigned int init_allocator(unsigned int _basic_block_size,
 
 unsigned int block_needed(unsigned int _length);
 
-void split(int i);
+int block_index(unsigned int _length);
+
+void split(int i, int block_length);
 
 int release_allocator(); 
 /* This function returns any allocated memory to the operating system. 
