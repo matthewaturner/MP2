@@ -22,14 +22,15 @@
 /* INCLUDES */
 /*--------------------------------------------------------------------------*/
 
-#include<stdlib.h>
+#include <stdlib.h>
+#include <stddef.h>
 #include "my_allocator.h"
 
 /*--------------------------------------------------------------------------*/
 /* DATA STRUCTURES */ 
 /*--------------------------------------------------------------------------*/
 
-    /* -- (none) -- */
+char **free_list;
 
 /*--------------------------------------------------------------------------*/
 /* CONSTANTS */
@@ -49,6 +50,14 @@
 
 /* Don't forget to implement "init_allocator" and "release_allocator"! */
 
+void init_allocator(int M)
+{
+	free_list = (char **)calloc((int)log2(M), sizeof(char *));
+	header *temp = (header *)malloc(M);
+	temp->size = M;
+	temp->next = NULL;
+	free_list[(int)log2(M)-1] = (char *)temp;
+}
 
 extern Addr my_malloc(unsigned int _length) 
 {
@@ -56,7 +65,26 @@ extern Addr my_malloc(unsigned int _length)
      the C standard library! 
      Of course this needs to be replaced by your implementation.
   */
-  return malloc((size_t)_length);
+	unsigned int block_length = block_needed(_length);
+	
+	int block_index = (int)log2(block_length);
+	int i = block_index;
+	while(free_list[i] == NULL) {
+		i++;
+	}
+	while(i > block_index) {
+		split(i);
+		i--;
+	}
+	//return malloc((size_t)_length);
+}
+
+void split(int i) {
+	if(i < 1)
+		return;
+	header *temp = (header *)free_list[i];
+	int size = temp->size;
+	
 }
 
 unsigned int block_needed(unsigned int _length) 

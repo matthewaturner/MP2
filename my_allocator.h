@@ -23,10 +23,10 @@
 /* DEFINES */
 /*--------------------------------------------------------------------------*/
 
-typedef struct header {
+struct header {
 	char *next;
-	unsigned int size;
-} *head;
+	int size;
+};
 
 //char *free_list; // = calloc((int)log2(memsize), sizeof(*char));
 
@@ -54,6 +54,10 @@ unsigned int init_allocator(unsigned int _basic_block_size,
    memory made available to the allocator. If an error occurred, 
    it returns 0. 
 */ 
+
+unsigned int block_needed(unsigned int _length);
+
+void split(int i);
 
 int release_allocator(); 
 /* This function returns any allocated memory to the operating system. 
