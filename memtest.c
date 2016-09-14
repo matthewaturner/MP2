@@ -10,8 +10,9 @@ int main(int argc, char ** argv) {
 
   init_allocator(8, memsize);
   
-  printf("pointer for 100 bytes: %s", my_malloc(100));
-
+  printf("pointer for 100 bytes: %p\n", my_malloc(100));
+  
+  print_free_list();
   //ackerman_main();
 
 
