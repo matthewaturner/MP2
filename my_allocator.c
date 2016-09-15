@@ -64,9 +64,8 @@ int release_allocator()
 
 extern Addr my_malloc(unsigned int _size) 
 {
-  /* This preliminary implementation simply hands the call over the 
-     the C standard library! 
-     Of course this needs to be replaced by your implementation.
+  /* Returns the address of a block of memory guaranteed to be at least
+     as large as _size
   */
 	// find min power of two to return
 	int block_size = block_needed(_size);
@@ -115,13 +114,18 @@ void split(int i, int block_size)
 	}
 }
 
+void merge(int i)
+{
+	// I got nothing lol
+}
+
 unsigned int block_needed(unsigned int _size) 
 {
   /* Size of the block needed (smallest power of two the size fits in) */
 
 	// minimum useful block size is 16 bytes bc header is 8 bytes
 	int i=4;
-	// subtract 8 to accound for the header
+	// subtract 8 to account for the header
 	while(pow(2, i)-8 < _size)
 		i++;
 	return pow(2, i);
@@ -139,9 +143,19 @@ extern int my_free(Addr _a)
   /* Remember to subtract 8 from the address given in order to get the address to the header */
   // Also, pointer arithmetic on a void* may not work, may want to cast to a header and subract 1
 	header *temp = (header *)_a - 1;
-	int _size = temp->size;
-  free(_a);
-  return 0;
+	int i = block_index(temp->size);
+	header *iter = free_list[i];
+	
+	while(iter->next != NULL)
+		iter = iter->next;
+	iter->next = temp;
+	
+	while(i < free_list_size-1 && free_list[i] != NULL) {
+		merge(i);
+		i++;
+	}
+	
+	return 0;
 }
 
 void print_free_list()

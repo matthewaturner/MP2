@@ -55,6 +55,8 @@ int block_index(unsigned int _size);
 
 void split(int i, int block_size);
 
+void merge(int i);
+
 int release_allocator(); 
 /* This function returns any allocated memory to the operating system. 
    After this function is called, any allocation fails.
