@@ -102,7 +102,7 @@ void split(int i, int block_size)
 		size = free_list[i]->size;
 		left = free_list[i];
 		left->size = size/2;
-		right = left+size/2;
+		right = (header*)((char *)left+size/2);
 		right->size = size/2;
 
 		free_list[i] = left->next;
