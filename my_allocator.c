@@ -102,6 +102,7 @@ void split(int i, int block_size)
 		size = free_list[i]->size;
 		left = free_list[i];
 		left->size = size/2;
+		// cast to a char before doing arithmetic
 		right = (header*)((char *)left+size/2);
 		right->size = size/2;
 
@@ -112,11 +113,6 @@ void split(int i, int block_size)
 		free_list[i-1] = left;
 		i--;
 	}
-}
-
-void merge(int i)
-{
-	// I got nothing lol
 }
 
 unsigned int block_needed(unsigned int _size) 
@@ -141,8 +137,8 @@ int block_index(unsigned int _size)
 extern int my_free(Addr _a) 
 {
   /* Remember to subtract 8 from the address given in order to get the address to the header */
-  // Also, pointer arithmetic on a void* may not work, may want to cast to a header and subract 1
-	header *temp = (header *)_a - 1;
+  // Also, pointer arithmetic on a void* may not work
+	header *temp = (header *)_a - 1; // only -1 because it moves back the size of a header
 	int i = block_index(temp->size);
 	header *iter = free_list[i];
 	
@@ -156,6 +152,47 @@ extern int my_free(Addr _a)
 	}
 	
 	return 0;
+}
+
+void merge(int i)
+{
+  /* Looks for blocks that can merge from the ith SLL in free_list
+     When two mergeable blocks are found, merge them, put them into the i+1th list and return
+     There should only ever be one pair to merge at most because we free blocks one at a time
+  */
+	header *iter_a, *iter_b;
+	iter_a = free_list[i];
+
+	// these loops should try all combinations of headers in the list
+	while(iter_a != NULL) {
+		iter_b = iter_a->next;
+		while(iter_b != NULL) {
+			if(can_merge(iter_a, iter_b)) {	
+				// attempt at merging the blocks
+				// can't figure out how we should handle setting the previous
+				// pointer to the left header
+				header *left, *right;
+				if(iter_a < iter_b) {
+					left = iter_a;
+					right = iter_b;
+				} else {
+					left = iter_b;
+					right = iter_a;
+				}
+				left->size = left->size *2;
+				right = NULL;
+				// need to fix the linked lists now
+				return;
+			}
+			iter_b = iter_b->next;
+		}
+		iter_a = iter_a->next;
+	}
+}
+
+bool can_merge(header *a, header *b) {
+	// merge logic
+	return false;
 }
 
 void print_free_list()
