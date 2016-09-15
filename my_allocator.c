@@ -80,9 +80,14 @@ extern Addr my_malloc(unsigned int _length)
 	// index of the block we need in free_list
 	int i = block_index(block_length);
 	
+	// ::::: need to error check for i=-1 (returned when block_length too big)
+	
 	// until we find a block of at least block_length size, increase the index
 	while(i < free_list_size && free_list[i] == NULL)
 		i++;
+
+	// ::::: need to error check to make sure there is space at all in the free_list
+
 	// split blocks starting with i until we have a block of size block_length
 	split(i, block_length);
 	
@@ -132,12 +137,14 @@ unsigned int block_needed(unsigned int _length)
 int block_index(unsigned int _length)
 {
   /* Returns the index of the list of _length sized blocks in the free_list */
+	// ::::: needs error checking, return -1 if _length is too big
 	return (unsigned int)log2(_length)-4;
 }
 
 extern int my_free(Addr _a) 
 {
   /* Remember to subtract 8 from the address given in order to get the address to the header */
+  // Also, pointer arithmetic on a void* may not work, may to cast to a header and subract 1
   free(_a);
   return 0;
 }
