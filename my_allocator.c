@@ -198,7 +198,14 @@ bool can_merge(header *a, header *b) {
 void print_free_list()
 {
 	printf("Free List:\n");
-	for(int i=0; i<free_list_size; i++)
-		printf("%5i: %p\n", (int)pow(2, i+4), free_list[i]);
+	for(int i=0; i<free_list_size; i++) {
+		printf("%5i: ", (int)pow(2, i+4));
+		header *iter = free_list[i];
+		while(iter != NULL) {
+			printf("%p->", iter);
+			iter = iter->next;
+		}
+		printf("null\n");
+	}
 }
 

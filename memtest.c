@@ -20,6 +20,9 @@ int main(int argc, char ** argv) {
   void *c = my_malloc(120);
   printf("Obtained 120 bytes: %p\n", c);
   print_free_list();
+  void *d = my_malloc(40);
+  printf("Obtained 40 bytes: %p\n", d);
+  print_free_list();
   //ackerman_main();
 
   printf("\nReleasing Allocator\n");
