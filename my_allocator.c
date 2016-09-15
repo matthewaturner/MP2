@@ -31,7 +31,7 @@
 /* DATA STRUCTURES */ 
 /*--------------------------------------------------------------------------*/
 
-char **free_list;
+header **free_list;
 int free_list_size;
 
 /*--------------------------------------------------------------------------*/
@@ -54,14 +54,19 @@ int free_list_size;
 
 unsigned int init_allocator(unsigned int bbs, unsigned int M)
 {
-  /* Initialize total mem size and free_list
-  */
-	free_list = (char **)calloc((int)log2(M), sizeof(char *)); // allocate space for the free list
-	header *temp = (header *)malloc(M);                        // allocate actual memory
+  /* Initialize total mem size and free_list */
+	
+	// allocate free_list space, don't need space for 2, 4, 8 byte lists
+	free_list = (header **)calloc((int)log2(M)-3, sizeof(header *));
+	// allocate actual memory
+	header *temp = (header *)malloc(M);
+	// set header attributes for whole memory block
 	temp->size = M;
 	temp->next = NULL;
-	free_list[(int)log2(M)-1] = (char *)temp; // index of the M-size block list in free_list
-	free_list_size = (int)log2(M);            // store size of the free_list
+	// set largest block list pointer to the whole memory allocated
+	free_list[block_index(M)] = (header *)temp;
+	// store size of free_list
+	free_list_size = (int)log2(M)-3;
 }
 
 extern Addr my_malloc(unsigned int _length) 
@@ -70,19 +75,25 @@ extern Addr my_malloc(unsigned int _length)
      the C standard library! 
      Of course this needs to be replaced by your implementation.
   */
-	int block_length = block_needed(_length); // find min power of two to return
-	int i = (int)log2(block_length)-1;        // index of list of those blocks
+	// find min power of two to return
+	int block_length = block_needed(_length);
+	// index of the block we need in free_list
+	int i = block_index(block_length);
 	
-	while(i < free_list_size && free_list[i] == NULL) // find a block with the mem we need 
+	// until we find a block of at least block_length size, increase the index
+	while(i < free_list_size && free_list[i] == NULL)
 		i++;
-	split(i, block_length);        // split blocks until we have a block of size block_length
+	// split blocks starting with i until we have a block of size block_length
+	split(i, block_length);
 	
-	i = (int)log2(block_length-1); // free_list[i] will now have a block of correct size
+	// free_list[i] will now have a block of correct size
+	i = block_index(block_length);
+	// store pointer to block
 	header *temp = (header *)free_list[i];
-	free_list[i] = temp->next;     // remove the block we are returning from free_list
-	return temp + 8;               // add 8 to the pointer so data doesn't overwrite block header
-
-	// return malloc((size_t)_length);
+	// remove the block we are returning from the free_list of that size
+	free_list[i] = temp->next;
+	// add 8 to the pointer returned so data doesn't overwrite block header
+	return (void *)(temp + 1);
 }
 
 void split(int i, int block_length)
@@ -98,27 +109,35 @@ void split(int i, int block_length)
 		right->size = size/2;
 
 		free_list[i] = left->next;
-		left->next = (char *)right;
+		left->next = (header *)right;
 		right->next = NULL;
 
-		free_list[i-1] = (char *)left;
+		free_list[i-1] = (header *)left;
 		i--;
 	}
 }
 
 unsigned int block_needed(unsigned int _length) 
 {
-  /* Size of the block needed (smallest power of two the length fits in)
-  */
-	int i=4; // Minimum block size that is useful, bc header is 8 bytes
-	while(pow(2, i)-8 < _length) // subtract 8 bc header takes up 8 bytes
+  /* Size of the block needed (smallest power of two the length fits in) */
+
+	// minimum useful block size is 16 bytes bc header is 8 bytes
+	int i=4;
+	// subtract 8 to accound for the header
+	while(pow(2, i)-8 < _length)
 		i++;
 	return pow(2, i);
 }
 
+int block_index(unsigned int _length)
+{
+  /* Returns the index of the list of _length sized blocks in the free_list */
+	return (unsigned int)log2(_length)-4;
+}
+
 extern int my_free(Addr _a) 
 {
-  /* Same here! */
+  /* Remember to subtract 8 from the address given in order to get the address to the header */
   free(_a);
   return 0;
 }
@@ -127,6 +146,6 @@ void print_free_list()
 {
 	printf("Free List:\n");
 	for(int i=0; i<free_list_size; i++)
-		printf("%i: %p\n", i, free_list[i]);
+		printf("%5i: %p\n", (int)pow(2, i+4), free_list[i]);
 }
 

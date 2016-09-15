@@ -11,10 +11,13 @@ int main(int argc, char ** argv) {
   init_allocator(8, memsize);
   
   void *a = my_malloc(100);
-  printf("pointer for 100 bytes: %p\n", a);
+  printf("Obtained 100 bytes: %p\n", a);
   print_free_list();
-  void *b = my_malloc(450);
-  printf("pointer for 450 bytes: %p\n", b);
+  void *b = my_malloc(110);
+  printf("Obtained 110 bytes: %p\n", b);
+  print_free_list();
+  void *c = my_malloc(120);
+  printf("Obtained 120 bytes: %p\n", c);
   print_free_list();
   //ackerman_main();
 
