@@ -22,6 +22,7 @@ int main(int argc, char ** argv) {
   print_free_list();
   //ackerman_main();
 
-
-  // release_allocator()
+  printf("\nReleasing Allocator\n");
+  release_allocator();
+  print_free_list();
 }

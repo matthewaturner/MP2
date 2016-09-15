@@ -37,12 +37,6 @@ struct header {
 typedef void * Addr; 
 
 /*--------------------------------------------------------------------------*/
-/* FORWARDS */ 
-/*--------------------------------------------------------------------------*/
-
-/* -- (none) -- */
-
-/*--------------------------------------------------------------------------*/
 /* MODULE   MY_ALLOCATOR */
 /*--------------------------------------------------------------------------*/
 
@@ -55,18 +49,18 @@ unsigned int init_allocator(unsigned int bbs,
    it returns 0. 
 */ 
 
-unsigned int block_needed(unsigned int _length);
+unsigned int block_needed(unsigned int _size);
 
-int block_index(unsigned int _length);
+int block_index(unsigned int _size);
 
-void split(int i, int block_length);
+void split(int i, int block_size);
 
 int release_allocator(); 
 /* This function returns any allocated memory to the operating system. 
    After this function is called, any allocation fails.
 */ 
 
-Addr my_malloc(unsigned int _length); 
+Addr my_malloc(unsigned int _size); 
 /* Allocate _length number of bytes of free memory and returns the 
    address of the allocated portion. Returns 0 when out of memory. */ 
 
