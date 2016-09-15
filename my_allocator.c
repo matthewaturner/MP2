@@ -64,7 +64,7 @@ unsigned int init_allocator(unsigned int bbs, unsigned int M)
 	temp->size = M;
 	temp->next = NULL;
 	// set largest block list pointer to the whole memory allocated
-	free_list[block_index(M)] = (header *)temp;
+	free_list[block_index(M)] = temp;
 	// store size of free_list
 	free_list_size = (int)log2(M)-3;
 }
@@ -89,7 +89,7 @@ extern Addr my_malloc(unsigned int _length)
 	// free_list[i] will now have a block of correct size
 	i = block_index(block_length);
 	// store pointer to block
-	header *temp = (header *)free_list[i];
+	header *temp = free_list[i];
 	// remove the block we are returning from the free_list of that size
 	free_list[i] = temp->next;
 	// add 8 to the pointer returned so data doesn't overwrite block header
@@ -101,18 +101,18 @@ void split(int i, int block_length)
 	header *left, *right;
 	int size;
 
-	while( ((header *)free_list[i])->size != block_length) {
-		size = ((header *)free_list[i])->size;
-		left = (header *)free_list[i];
+	while( (free_list[i])->size != block_length) {
+		size = free_list[i]->size;
+		left = free_list[i];
 		left->size = size/2;
 		right = left+size/2;
 		right->size = size/2;
 
 		free_list[i] = left->next;
-		left->next = (header *)right;
+		left->next = right;
 		right->next = NULL;
 
-		free_list[i-1] = (header *)left;
+		free_list[i-1] = left;
 		i--;
 	}
 }

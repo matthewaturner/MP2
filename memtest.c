@@ -10,6 +10,7 @@ int main(int argc, char ** argv) {
 
   init_allocator(8, memsize);
   
+  print_free_list();  
   void *a = my_malloc(100);
   printf("Obtained 100 bytes: %p\n", a);
   print_free_list();
