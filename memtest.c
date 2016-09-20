@@ -25,6 +25,11 @@ int main(int argc, char ** argv) {
   print_free_list();
   //ackerman_main();
   my_free(d);
+  printf("Freed 40 byte pointer: %p\n", d);
+  print_free_list();
+  my_free(a);
+  printf("Freed 100 byte pointer: %p\n", a);
+  print_free_list();
 
   printf("\nReleasing Allocator\n");
   release_allocator();

@@ -150,36 +150,54 @@ extern int my_free(Addr _a)
 
 void merge(header *temp, int i)
 {
-	if(i >= free_list_size-1)
+	printf("Merging block %p of size %i into index %i\n", temp, temp->size, i);
+	if(block_index(temp->size) != i) {
+		printf("Merging blocks of incorrect sizes! %i->%i", temp->size, i);
 		return;
+	}
+
+	if(i >= free_list_size-1) {
+	 	free_list[free_list_size-1] = temp;
+		return;
+	}
 	header *iter = free_list[i];
-	
+	header *prev_iter = NULL;
 	while(iter != NULL) {
 		if(can_merge(temp, iter)) {
-			// merge
+			// take block out of this free_list
+			if(prev_iter != NULL)
+				prev_iter->next = iter->next;
+			else
+				free_list[i] = NULL;
+			// left and right blocks simplify merging
+			header *left, *right;
+			if(temp < iter)	{
+				left = temp;
+				right = iter;
+			} else {
+				left = iter;
+				right = temp;
+			}
+			// double size of block and move it upwards
+			left->size = left->size *2;
+			// recurse upwards
+			merge(left, i+1);
+			return;
 		}
+		prev_iter = iter;
 		iter = iter->next;
 	}
-	return;
+	// if we don't find mergeable blocks, insert block into this free list
+	temp->next = free_list[i];
+	free_list[i] = temp;
 }
 
 bool can_merge(header *a, header *b)
 {
-
 	//printf("Pointers: %p, %p\n", a, b);
 	//printf("Distance from head: %d, %d\n", ((char *)a - (char *)head), ((char *)b - (char *)head));
 	//printf("XOR of (a-Head) and (b-Head): %d\n", ((char *)a - (char *)head) ^ ((char *)b - (char *)head));
-
-	if ( ( ( (char *)a - (char *)head) ^ ( (char *)b - (char *)head) == a->size) && (a->size == b->size))
-	{
-		//printf("Blocks are mergeable.\n");
-		return true;
-	}
-	else
-	{
-		//printf("Blocks are NOT mergeable.\n");
-		return false;
-	}
+	return (((char *)a - (char *)head)^((char *)b - (char *)head) == a->size) && (a->size == b->size);
 }
 
 void print_free_list()
