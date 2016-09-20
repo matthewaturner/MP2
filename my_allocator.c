@@ -43,7 +43,7 @@ unsigned int init_allocator(unsigned int bbs, unsigned int M)
 	// allocate free_list space, don't need space for 2, 4, 8 byte lists
 	free_list = (header **)calloc((int)log2(M)-3, sizeof(header *));
 	// allocate actual memory
-	header *head = (header *)malloc(M);
+	head = (header *)malloc(M);
 	// set header attributes for whole memory block
 	head->size = M;
 	head->next = NULL;
@@ -165,9 +165,21 @@ void merge(header *temp, int i)
 
 bool can_merge(header *a, header *b)
 {
-	printf("Pointers: %p, %p\n", a, b);
-	printf("Relative Pointers: %p, %p\n", a-head, b-head);
-	return false;
+
+	//printf("Pointers: %p, %p\n", a, b);
+	//printf("Distance from head: %d, %d\n", ((char *)a - (char *)head), ((char *)b - (char *)head));
+	//printf("XOR of (a-Head) and (b-Head): %d\n", ((char *)a - (char *)head) ^ ((char *)b - (char *)head));
+
+	if ( ( ( (char *)a - (char *)head) ^ ( (char *)b - (char *)head) == a->size) && (a->size == b->size))
+	{
+		//printf("Blocks are mergeable.\n");
+		return true;
+	}
+	else
+	{
+		//printf("Blocks are NOT mergeable.\n");
+		return false;
+	}
 }
 
 void print_free_list()
