@@ -24,6 +24,7 @@ int main(int argc, char ** argv) {
   printf("Obtained 40 bytes: %p\n", d);
   print_free_list();
   //ackerman_main();
+  my_free(d);
 
   printf("\nReleasing Allocator\n");
   release_allocator();

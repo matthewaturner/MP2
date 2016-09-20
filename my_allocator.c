@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 #include "my_allocator.h"
 
 /*--------------------------------------------------------------------------*/
@@ -51,6 +52,7 @@ unsigned int init_allocator(unsigned int bbs, unsigned int M)
 	// store size of free_list
 	free_list_size = (int)log2(M)-3;
 	
+	printf("Head pointer: %p\n", head);
 	return 0;
 }
 
@@ -138,60 +140,33 @@ extern int my_free(Addr _a)
 {
   /* Remember to subtract 8 from the address given in order to get the address to the header */
   // Also, pointer arithmetic on a void* may not work
-	header *temp = (header *)_a - 1; // only -1 because it moves back the size of a header
+	header *temp = ((header *)_a) - 1; // only -1 because it moves back the size of a header
 	int i = block_index(temp->size);
-	header *iter = free_list[i];
 	
-	while(iter->next != NULL)
-		iter = iter->next;
-	iter->next = temp;
-	
-	while(i < free_list_size-1 && free_list[i] != NULL) {
-		merge(i);
-		i++;
-	}
-	
+	merge(temp, i);	
+
 	return 0;
 }
 
-void merge(int i)
+void merge(header *temp, int i)
 {
-  /* Looks for blocks that can merge from the ith SLL in free_list
-     When two mergeable blocks are found, merge them, put them into the i+1th list and return
-     There should only ever be one pair to merge at most because we free blocks one at a time
-  */
-	header *iter_a, *iter_b;
-	iter_a = free_list[i];
-
-	// these loops should try all combinations of headers in the list
-	while(iter_a != NULL) {
-		iter_b = iter_a->next;
-		while(iter_b != NULL) {
-			if(can_merge(iter_a, iter_b)) {	
-				// attempt at merging the blocks
-				// can't figure out how we should handle setting the previous
-				// pointer to the left header
-				header *left, *right;
-				if(iter_a < iter_b) {
-					left = iter_a;
-					right = iter_b;
-				} else {
-					left = iter_b;
-					right = iter_a;
-				}
-				left->size = left->size *2;
-				right = NULL;
-				// need to fix the linked lists now
-				return;
-			}
-			iter_b = iter_b->next;
+	if(i >= free_list_size-1)
+		return;
+	header *iter = free_list[i];
+	
+	while(iter != NULL) {
+		if(can_merge(temp, iter)) {
+			// merge
 		}
-		iter_a = iter_a->next;
+		iter = iter->next;
 	}
+	return;
 }
 
-bool can_merge(header *a, header *b) {
-	// merge logic
+bool can_merge(header *a, header *b)
+{
+	printf("Pointers: %p, %p\n", a, b);
+	printf("Relative Pointers: %p, %p\n", a-head, b-head);
 	return false;
 }
 

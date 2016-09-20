@@ -55,7 +55,7 @@ int block_index(unsigned int _size);
 
 void split(int i, int block_size);
 
-void merge(int index);
+void merge(header *temp, int i);
 
 bool can_merge(header *a, header *b);
 
@@ -71,6 +71,8 @@ Addr my_malloc(unsigned int _size);
 int my_free(Addr _a); 
 /* Frees the section of physical memory previously allocated 
    using ’my_malloc’. Returns 0 if everything ok. */ 
+
+void bin(unsigned n);
 
 void print_free_list();
 #endif 
