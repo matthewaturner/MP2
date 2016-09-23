@@ -29,6 +29,8 @@
 header **free_list;
 header *head;
 int free_list_size;
+unsigned int basic_blocksize;
+int remaining_memsize;
 
 /*--------------------------------------------------------------------------*/
 /* FUNCTIONS FOR MODULE MY_ALLOCATOR */
@@ -39,7 +41,7 @@ int free_list_size;
 unsigned int init_allocator(unsigned int bbs, unsigned int M)
 {
   /* Initialize total mem size and free_list */
-	
+	basic_blocksize = bbs;
 	// allocate free_list space, don't need space for 2, 4, 8 byte lists
 	free_list = (header **)calloc((int)log2(M)-3, sizeof(header *));
 	// allocate actual memory
@@ -51,8 +53,9 @@ unsigned int init_allocator(unsigned int bbs, unsigned int M)
 	free_list[block_index(M)] = head;
 	// store size of free_list
 	free_list_size = (int)log2(M)-3;
+	remaining_memsize = M;
 	
-	printf("Head pointer: %p\n", head);
+	//printf("Head pointer: %p\n", head);
 	return 0;
 }
 
@@ -69,30 +72,38 @@ extern Addr my_malloc(unsigned int _size)
   /* Returns the address of a block of memory guaranteed to be at least
      as large as _size
   */
-	// find min power of two to return
-	int block_size = block_needed(_size);
-	// index of the block we need in free_list
-	int i = block_index(block_size);
-	
-	// ::::: need to error check for i=-1 (returned when block_size too big)
-	
-	// until we find a block of at least block_size, increase the index
-	while(i < free_list_size && free_list[i] == NULL)
-		i++;
 
-	// ::::: need to error check to make sure there is space at all in the free_list
+  // Return 0 if out of memory !!!!!!
+	if (remaining_memsize >= _size)
+	{
+		remaining_memsize -= _size;
+		printf("Remaining Memory After Malloc: %d\n", remaining_memsize);
+		// find min power of two to return
+		int block_size = block_needed(_size);
+		// index of the block we need in free_list
+		int i = block_index(block_size);
+		
+		// ::::: need to error check for i=-1 (returned when block_size too big)
+		
+		// until we find a block of at least block_size, increase the index
+		while(i < free_list_size && free_list[i] == NULL)
+			i++;
 
-	// split blocks starting with i until we have a block of size block_size
-	split(i, block_size);
-	
-	// free_list[i] will now have a block of correct size
-	i = block_index(block_size);
-	// store pointer to block
-	header *temp = free_list[i];
-	// remove the block we are returning from the free_list of that size
-	free_list[i] = temp->next;
-	// add 8 to the pointer returned so data doesn't overwrite block header
-	return (void *)(temp + 1);
+		// ::::: need to error check to make sure there is space at all in the free_list
+
+		// split blocks starting with i until we have a block of size block_size
+		split(i, block_size);
+		
+		// free_list[i] will now have a block of correct size
+		i = block_index(block_size);
+		// store pointer to block
+		header *temp = free_list[i];
+		// remove the block we are returning from the free_list of that size
+		free_list[i] = temp->next;
+		// add 8 to the pointer returned so data doesn't overwrite block header
+		return (void *)(temp + 1);
+	}
+	else return 0;
 }
 
 void split(int i, int block_size)
@@ -140,19 +151,29 @@ extern int my_free(Addr _a)
 {
   /* Remember to subtract 8 from the address given in order to get the address to the header */
   // Also, pointer arithmetic on a void* may not work
+
+  // function for error checking
+  // check if _a is within our valid memory range.
+
+  	if (_a == head)
+	  printf("Free head 2016\n\n");
+
 	header *temp = ((header *)_a) - 1; // only -1 because it moves back the size of a header
 	int i = block_index(temp->size);
-	
-	merge(temp, i);	
+
+	merge(temp, i);
+	printf("Temp->size:\t%d\n",temp->size);
+	remaining_memsize += temp->size;
+	printf("Remaining Memory After Free: %d\n", remaining_memsize);	
 
 	return 0;
 }
 
 void merge(header *temp, int i)
 {
-	printf("Merging block %p of size %i into index %i\n", temp, temp->size, i);
+	//printf("Merging block %p of size %i into index %i\n", temp, temp->size, i);
 	if(block_index(temp->size) != i) {
-		printf("Merging blocks of incorrect sizes! %i->%i", temp->size, i);
+		printf("ERROR:: !! Merging blocks of incorrect sizes! %i->%i", temp->size, i);
 		return;
 	}
 
@@ -168,7 +189,7 @@ void merge(header *temp, int i)
 			if(prev_iter != NULL)
 				prev_iter->next = iter->next;
 			else
-				free_list[i] = NULL;
+				free_list[i] = iter->next;
 			// left and right blocks simplify merging
 			header *left, *right;
 			if(temp < iter)	{
