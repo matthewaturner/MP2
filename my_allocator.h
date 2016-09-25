@@ -40,8 +40,8 @@ typedef void * Addr;
 /* MODULE   MY_ALLOCATOR */
 /*--------------------------------------------------------------------------*/
 
-unsigned int init_allocator(unsigned int bbs, 
-			    unsigned int M); 
+unsigned int init_allocator(unsigned int basic_block_size, 
+			    unsigned int memsize); 
 /* This function initializes the memory allocator and makes a portion of 
    ’_length’ bytes available. The allocator uses a ’_basic_block_size’ as 
    its minimal unit of allocation. The function returns the amount of 
@@ -71,6 +71,10 @@ Addr my_malloc(unsigned int _size);
 int my_free(Addr _a); 
 /* Frees the section of physical memory previously allocated 
    using ’my_malloc’. Returns 0 if everything ok. */ 
+
+bool block_used(header *a);
+
+void free_used(header *a);
 
 void bin(unsigned n);
 
