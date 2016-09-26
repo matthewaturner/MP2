@@ -1,14 +1,48 @@
 #include "ackerman.h"
 #include "my_allocator.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <getopt.h>
+
+void print_usage()
+{
+	printf("Two arguments expected.\nUsage is [-b <desired blocksize>] [-s <desired memsize>]\n");
+}
 
 int main(int argc, char ** argv) {
 
   // input parameters (basic block size, memory length)
 
-  int memsize = 524288; // Default: ~512KB or 2^19 bytes
-  int blocksize = 128; // Default: 128B
+  //printf("Two arguments expected.\nUsage is [-b <desired blocksize>] [-s <desired memsize>]\n");
+	
+	int option = 0;
+	int blocksize = -1;
+	int memsize = -1;
+	
+	while ((option = getopt(argc, argv,"b:s:")) != -1)
+	{
+		switch (option)
+		{
+			case 'b' : blocksize = atoi(optarg);
+				break;
+			case 's' : memsize = atoi(optarg);
+				break;
+			default: print_usage();
+				exit(EXIT_FAILURE);
+		}
+	}
+	
+	if (blocksize == -1 || memsize == -1)
+	{
+		print_usage();
+		exit(EXIT_FAILURE);
+	}
 
+  // memsize = 524288; // Default: ~512KB or 2^19 bytes
+  // blocksize = 128; // Default: 128B
+
+  printf("Given arguments are: %d and %d\n", blocksize, memsize);
   init_allocator(blocksize, memsize);
   
   /*// Testing functionality
