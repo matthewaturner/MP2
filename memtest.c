@@ -36,13 +36,16 @@ int main(int argc, char ** argv) {
 	if (blocksize == -1 || memsize == -1)
 	{
 		print_usage();
-		exit(EXIT_FAILURE);
+    printf("Using default values.\n");
+    memsize = 524288; // Default: ~512KB or 2^19 bytes
+    blocksize = 128; // Default: 128B
+		//exit(EXIT_FAILURE);
 	}
 
   // memsize = 524288; // Default: ~512KB or 2^19 bytes
   // blocksize = 128; // Default: 128B
 
-  printf("Given arguments are: %d and %d\n", blocksize, memsize);
+  printf("Given arguments are: b=%d and s=%d\n", blocksize, memsize);
   init_allocator(blocksize, memsize);
   
   /*// Testing functionality
