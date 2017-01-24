@@ -1,4 +1,4 @@
-Machine Problem 9 CSCE 313 at Texas A&M
+Machine Problem 2 CSCE 313 at Texas A&M
 
 Here comes the source code for MP1. The following files are included:
 
